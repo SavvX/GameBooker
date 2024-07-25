@@ -1,0 +1,164 @@
+/* Reset some default styles */
+body, h1, h2, h3, p, form, input, select, button, .device {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgba(255, 255, 255, 1); /* White */
+    color: rgba(0, 0, 0, 1); /* Black */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: rgba(247, 218, 8, 1); /* Yellow */
+    font-size: 2.5em; /* Larger title size */
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 1em; /* Smaller subtitle size */
+    color: rgba(116, 114, 114, 1); /* Gray */
+}
+
+main {
+    display: flex;
+    width: 100%;
+}
+
+.left-panel {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.right-panel {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.reservation-form, .room-layout {
+    background: rgba(255, 255, 255, 1); /* White */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: rgba(247, 218, 8, 1); /* Yellow */
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: rgba(116, 114, 114, 1); /* Gray */
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"], input[type="email"], select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(116, 114, 114, 1); /* Gray */
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(247, 218, 8, 1); /* Yellow */
+    color: rgba(0, 0, 0, 1); /* Black */
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgba(255, 211, 0, 1); /* Slightly darker Yellow */
+}
+
+.device-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.device-group {
+    background: rgba(240, 240, 240, 1); /* Light Gray */
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.pc-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns for PCs */
+    grid-auto-rows: minmax(100px, auto); /* Ensure rows are of reasonable height */
+
+}
+
+.console-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    grid-auto-rows: repeat(2, auto); /* Two rows */
+}
+
+.device-group h3 {
+    margin-bottom: 10px;
+    color: rgba(0, 0, 0, 1); /* Black */
+}
+
+.device-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px; /* Small space between device items */
+}
+
+.device-label {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 1); /* Black */
+    min-width: 60px; /* Ensure labels are aligned */
+}
+
+.device {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 1); /* White */
+    border: 5px solid rgba(116, 114, 114, 1); /* Gray */
+    border-radius: 4px;
+    padding: 10px; /* Add padding to create space between the image and border */
+    object-fit: cover; /* Ensure image fits the container */
+}
+
+.console-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px; /* Small space between device items */
+}
+
+.console-item img {
+    width: 120px;
+    height: 120px;
+}
+
+.console-item p {
+    margin: 0;
+}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hive</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>The Hive</h1>
+            <p class="subtitle">Powered by GameBooker</p>
+        </header>
+        <main>
+            <div class="left-panel">
+                <section class="reservation-form">
+                    <h2>Reserve a Device</h2>
+                    <form id="reservationForm">
+                        <label for="username">Name:</label>
+                        <input type="text" id="name" name="name" required>
+
+                        <label for="school">Education Institution:</label>
+                        <select id="school" name="school" onchange="checkSchool(this.value)" required>
+                            <option value="BUas">BUas</option>
+                            <option value="Avans">Avans</option>
+                            <option value="DRP">DeRooiPannen</option>
+                            <option value="Curio">Curio</option>
+                            <option value="SintJoost">Sint Joost</option>
+                            <option value="NMC">Newman College</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input type="text" name="color" id="color" style="display:none;" />
+
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+
+                        <label for="device">Device:</label>
+                        <select id="device" name="device" required>
+                            <optgroup label="Computers">
+                                <option value="PC1">PC1</option>
+                                <option value="PC2">PC2</option>
+                                <option value="PC3">PC3</option>
+                                <option value="PC4">PC4</option>
+                                <option value="PC5">PC5</option>
+                                <option value="PC6">PC6</option>
+                                <option value="PC7">PC7</option>
+                                <option value="PC8">PC8</option>
+                                <option value="PC9">PC9</option>
+                                <option value="PC10">PC10</option>
+                            </optgroup>
+                            <optgroup label="Consoles">
+                                <option value="PS5">PS5</option>
+                                <option value="Switch1">Switch 1</option>
+                                <option value="Switch2">Switch 2</option>
+                            </optgroup>
+                        </select>
+
+                        <button type="submit">Reserve</button>
+                    </form>
+                </section>
+            </div>
+            <div class="right-panel">
+                <section class="room-layout">
+                    <h2>Devices Status</h2>
+                    <div class="device-container">
+                        <div class="device-group">
+                            <h3>Computers</h3>
+                            <div class="pc-layout">
+                                <div class="pc-column">
+                                    <div class="device-item">
+                                        <span class="device-label">PC1</span>
+                                        <img id="PC1" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC1">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC2</span>
+                                        <img id="PC2" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC2">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC3</span>
+                                        <img id="PC3" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC3">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC4</span>
+                                        <img id="PC4" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC4">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC5</span>
+                                        <img id="PC5" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC5">
+                                    </div>
+                                </div>
+                                <div class="pc-column">
+                                    <div class="device-item">
+                                        <span class="device-label">PC6</span>
+                                        <img id="PC6" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC6">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC7</span>
+                                        <img id="PC7" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC7">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC8</span>
+                                        <img id="PC8" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC8">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC9</span>
+                                        <img id="PC9" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC9">
+                                    </div>
+                                    <div class="device-item">
+                                        <span class="device-label">PC10</span>
+                                        <img id="PC10" class="device" src="{{ url_for('static', filename='PC.png') }}"
+                                            alt="PC10">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="device-group">
+                            <h3>Consoles</h3>
+                            <div class="console-layout">
+                                <div class="device-item">
+                                    <span class="device-label">Switch 1</span>
+                                    <img id="Switch1" class="device"
+                                        src="{{ url_for('static', filename='Switch.png') }}" alt="Nintendo Switch 1">
+                                </div>
+                                <div class="device-item">
+                                    <span class="device-label">Switch 2</span>
+                                    <img id="Switch2" class="device"
+                                        src="{{ url_for('static', filename='Switch.png') }}" alt="Nintendo Switch 2">
+                                </div>
+                                <div class="device-item">
+                                    <span class="device-label">Sim 1</span>
+                                    <img id="RacingSim1" class="device"
+                                        src="{{ url_for('static', filename='Racing.png') }}" alt="Racing Simulator 1">
+                                </div>
+                                <div class="device-item">
+                                    <span class="device-label">Sim 2</span>
+                                    <img id="RacingSim2" class="device"
+                                        src="{{ url_for('static', filename='Racing.png') }}" alt="Racing Simulator 2">
+                                </div>
+                                <div class="device-item">
+                                    <span class="device-label">PS5</span>
+                                    <img id="PS5" class="device" src="{{ url_for('static', filename='PS.png') }}"
+                                        alt="PlayStation 5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function checkSchool(val) {
+            let element = document.getElementById('color');
+            if (val == 'other') {
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+
+        document.getElementById('reservationForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const school = document.getElementById('school').value;
+            const email = document.getElementById('email').value;
+            const device = document.getElementById('device').value;
+
+            fetch('/reserve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, school, email, device })
+            })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+        });
+
+        function fetchDeviceStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const devices = document.querySelectorAll('.device');
+                    devices.forEach(device => {
+                        const deviceId = device.id;
+                        const status = data[deviceId];
+                        device.style.border = status === 'Available' ? '5px solid green' : '5px solid red';
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        fetchDeviceStatus(); // Initial fetch
+        setInterval(fetchDeviceStatus, 5000);  // Refresh status every 5 seconds
+    </script>
+</body>
+
+</html>

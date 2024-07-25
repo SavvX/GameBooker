@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
 import random
 import string
@@ -10,7 +10,8 @@ db = SQLAlchemy(app)
 
 class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    school = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), nullable=False)
     device = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
@@ -19,13 +20,14 @@ class Reservation(db.Model):
 @app.route("/reserve", methods=["POST"])
 def reserve():
     data = request.get_json()
-    username = data["username"]
+    name = data["name"]
+    school = data["school"]
     email = data["email"]
     device = data["device"]
     password = "".join(random.choices(string.digits, k=4))
 
     reservation = Reservation(
-        username=username, email=email, device=device, password=password
+        name=name, school=school, email=email, device=device, password=password
     )
     db.session.add(reservation)
     db.session.commit()
@@ -51,6 +53,8 @@ def status():
         "PS5",
         "Switch1",
         "Switch2",
+        "RacingSim1",
+        "RacingSim2",
     ]
     status = {}
     for device in devices:
@@ -64,9 +68,9 @@ def status():
     return jsonify(status)
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return send_from_directory("", "index.html")
+    return render_template("index.html")
 
 
 if __name__ == "__main__":
