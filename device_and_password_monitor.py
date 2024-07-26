@@ -2,28 +2,29 @@ import random
 import string
 import requests
 import platform
-import socket
-import time
+import psutil
+import os
 
-# Server URLs
-SERVER_URL_RESERVE = "http://localhost:5000/reserve"
-SERVER_URL_STATUS = "http://localhost:5000/status"
-SERVER_URL_OFFLINE = "http://localhost:5000/device_offline"
+DEVICE_NAME = platform.node()
 
-# Device Information
-DEVICE_NAME = platform.node()  # Get the name of the device (e.g., PC1, PC2)
+# List of known game executables
+KNOWN_GAMES = {
+    'csgo.exe': 'Counter-Strike: Global Offensive',
+    'dota2.exe': 'Dota 2',
+    'valorant.exe': 'Valorant',
+    'leagueoflegends.exe': 'League of Legends',
+    # Add more games here
+}
 
 
 def generate_password():
-    """Generate a random 4-digit password."""
     return "".join(random.choices(string.digits, k=4))
 
 
 def update_password(device_name):
-    """Update the password for the device."""
     new_password = generate_password()
     response = requests.post(
-        SERVER_URL_RESERVE,
+        "http://localhost:5000/reserve",
         json={
             "username": "system",
             "email": "system@lanroom.com",
@@ -36,45 +37,38 @@ def update_password(device_name):
         print("Failed to update password")
 
 
-def is_device_online():
-    """Check if the device is online."""
-    try:
-        # Try connecting to a known address to check internet connectivity
-        socket.create_connection(("8.8.8.8", 80), timeout=5)
-        return True
-    except OSError:
-        return False
+def get_running_games():
+    running_games = []
+    for process in psutil.process_iter(['pid', 'name']):
+        try:
+            if process.info['name'].lower() in KNOWN_GAMES:
+                running_games.append(KNOWN_GAMES[process.info['name'].lower()])
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return running_games
 
 
-def notify_device_offline():
-    """Notify the server that the device is offline."""
-    response = requests.post(SERVER_URL_OFFLINE, json={"device": DEVICE_NAME})
-    print(f"Device offline notification: {response.json()}")
-
-
-def fetch_device_status():
-    """Fetch the device status from the server."""
-    response = requests.get(SERVER_URL_STATUS)
-    if response.status_code == 200:
-        status = response.json()
-        if DEVICE_NAME in status and status[DEVICE_NAME] == "Available":
-            print(f"{DEVICE_NAME} is available.")
-        else:
-            print(f"{DEVICE_NAME} status: {status.get(DEVICE_NAME, 'Unknown')}")
+def update_device_status(device_name):
+    # Check if the device is off (simulate by checking if no games are running)
+    running_games = get_running_games()
+    if not running_games:
+        status = "Available"
     else:
-        print("Failed to fetch device status")
-
-
-def main():
-    """Main function to run the device monitoring and password updating."""
-    while True:
-        if not is_device_online():
-            notify_device_offline()
-        else:
-            fetch_device_status()
-            update_password(DEVICE_NAME)
-        time.sleep(60)  # Check every minute
+        status = "In Use"
+    
+    response = requests.post(
+        "http://localhost:5000/update_status",
+        json={
+            "device": device_name,
+            "status": status,
+        },
+    )
+    if response.status_code == 200:
+        print(f"Status for {device_name} updated to {status}")
+    else:
+        print("Failed to update status")
 
 
 if __name__ == "__main__":
-    main()
+    update_password(DEVICE_NAME)
+    update_device_status(DEVICE_NAME)
