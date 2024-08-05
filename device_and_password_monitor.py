@@ -55,7 +55,8 @@ def update_device_status(device_name):
         status = "Available"
     else:
         status = "In Use"
-    
+
+    # Check if the device is currently in use by another user
     response = requests.post(
         "http://localhost:5000/update_status",
         json={

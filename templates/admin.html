@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hive - Admin Panel</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>The Hive</h1>
+            <h2>Powered by GameBooker</h2>
+        </header>
+        <main>
+            <div class="left-panel">
+                <section class="admin-panel">
+                    <h2>Admin Panel</h2>
+                    <form id="adminForm" action="{{ url_for('admin_action') }}" method="post">
+                        <label for="action">Action:</label>
+                        <select id="action" name="action" required>
+                            <option value="view_reservations">View Reservations</option>
+                            <option value="manage_devices">Manage Devices</option>
+                            <option value="add_user">Add User</option>
+                        </select>
+                        <button type="submit">Submit</button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
