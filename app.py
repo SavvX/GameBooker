@@ -15,6 +15,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///reservations.db"
 app.config["SECRET_KEY"] = "your_secret_key"
 db = SQLAlchemy(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -53,6 +54,13 @@ def reserve():
     school = data["school"]
     email = data["email"]
     device = data["device"]
+
+    # Check if the device is available
+    device_status = DeviceStatus.query.filter_by(device=device).first()
+
+    if device_status and device_status.status != "Available":
+        return jsonify({"message": f"Device {device} is not available."}), 400
+
     password = "".join(random.choices(string.digits, k=4))
 
     reservation = Reservation(
@@ -61,9 +69,17 @@ def reserve():
     db.session.add(reservation)
     db.session.commit()
 
+    # Update device status to 'Reserved'
+    if device_status:
+        device_status.status = "Reserved"
+    else:
+        new_device_status = DeviceStatus(device=device, status="Reserved")
+        db.session.add(new_device_status)
+
+    db.session.commit()
+
     return jsonify(
-        {"message":
-            f"Reservation successful! Password for {device}: {password}"}
+        {"message": f"Reservation successful! Password for {device}: {password}"}
     )
 
 
@@ -123,6 +139,14 @@ def index():
         school = data["school"]
         email = data["email"]
         device = data["device"]
+
+        # Check if the device is available
+        device_status = DeviceStatus.query.filter_by(device=device).first()
+
+        if device_status and device_status.status != "Available":
+            flash(f"Device {device} is not available.")
+            return redirect(url_for("index"))
+
         password = "".join(random.choices(string.digits, k=4))
 
         reservation = Reservation(
@@ -131,9 +155,18 @@ def index():
         db.session.add(reservation)
         db.session.commit()
 
-        return jsonify(
-            {"message": f"Reservation successful! Password for {device}: {password}"}
-        )
+        # Update device status to 'Reserved'
+        if device_status:
+            device_status.status = "Reserved"
+        else:
+            new_device_status = DeviceStatus(device=device, status="Reserved")
+            db.session.add(new_device_status)
+
+        db.session.commit()
+
+        flash(f"Reservation successful! Password for {device}: {password}")
+        return redirect(url_for("index"))
+
     return render_template("index.html")
 
 
