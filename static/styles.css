@@ -69,14 +69,27 @@ h3 {
 label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold; /* Make labels bold for better visibility */
 }
 
-input[type="text"], input[type="email"], select {
+input[type="text"], input[type="email"], select, input[type="date"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid rgba(116, 114, 114, 1); /* Gray */
     border-radius: 4px;
+    font-size: 14px; /* Standard font size for inputs */
+}
+
+.date-filter {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    align-items: center; /* Center align for better layout */
+}
+
+.date-input {
+    width: calc(50% - 10px); /* Distribute width evenly for both date inputs */
 }
 
 button {
@@ -88,6 +101,7 @@ button {
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
 }
 
 button:hover {
@@ -110,7 +124,6 @@ button:hover {
     display: grid;
     grid-template-columns: repeat(2, 1fr); /* Two columns for PCs */
     grid-auto-rows: minmax(100px, auto); /* Ensure rows are of reasonable height */
-
 }
 
 .console-layout {
@@ -124,7 +137,7 @@ button:hover {
     color: rgba(0, 0, 0, 1); /* Black */
 }
 
-.device-item {
+.device-item, .console-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -147,13 +160,6 @@ button:hover {
     object-fit: cover; /* Ensure image fits the container */
 }
 
-.console-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 5px; /* Small space between device items */
-}
-
 .console-item img {
     width: 120px;
     height: 120px;
@@ -162,3 +168,30 @@ button:hover {
 .console-item p {
     margin: 0;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid rgba(116, 114, 114, 1); /* Gray */
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: rgba(247, 218, 8, 0.1); /* Light Yellow */
+    color: rgba(0, 0, 0, 1); /* Black */
+}
+
+td {
+    background-color: rgba(255, 255, 255, 1); /* White */
+}
+
+/* Hover effect for table rows */
+tbody tr:hover {
+    background-color: rgba(247, 218, 8, 0.1); /* Light Yellow on hover */
+}
+

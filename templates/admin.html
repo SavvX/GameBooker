@@ -16,7 +16,7 @@
             <div class="left-panel">
                 <section class="admin-panel">
                     <h2>Admin Panel</h2>
-                    <form id="adminForm" action="{{ url_for('admin') }}" method="post">
+                    <form id="adminForm" action="{{ url_for('admin') }}" method="get">
                         <label for="action">Action:</label>
                         <select id="action" name="action" required>
                             <option value="view_reservations">View Reservations</option>
@@ -25,6 +25,50 @@
                         </select>
                         <button type="submit">Submit</button>
                     </form>
+
+                    {% if action == 'view_reservations' %}
+                    <h3>Filter Reservations</h3>
+                    <form action="{{ url_for('admin') }}" method="get">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                        <label for="end_date">End Date:</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                        <input type="hidden" name="action" value="view_reservations">
+                        <button type="submit">Filter</button>
+                    </form>
+
+                    {% if reservations %}
+                    <h3>Reservations</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>School</th>
+                                <th>Email</th>
+                                <th>Device</th>
+                                <th>Password</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                            <tr>
+                                <td>{{ reservation.id }}</td>
+                                <td>{{ reservation.name }}</td>
+                                <td>{{ reservation.school }}</td>
+                                <td>{{ reservation.email }}</td>
+                                <td>{{ reservation.device }}</td>
+                                <td>{{ reservation.password }}</td>
+                                <td>{{ reservation.date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>No reservations found for the selected period.</p>
+                    {% endif %}
+                    {% endif %}
                 </section>
             </div>
         </main>

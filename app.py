@@ -10,6 +10,7 @@ from flask_login import (
 )
 import random
 import string
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///reservations.db"
@@ -28,6 +29,7 @@ class Reservation(db.Model):
     email = db.Column(db.String(50), nullable=False)
     device = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 class DeviceStatus(db.Model):
@@ -170,37 +172,33 @@ def index():
     return render_template("index.html")
 
 
-# Admin routes
-@app.route("/admin", methods=["GET"])
+@app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin():
-    reservations = Reservation.query.all()
-    device_statuses = DeviceStatus.query.all()
+    action = request.args.get("action", "view_reservations")
+    reservations = []
+    device_statuses = []
+
+    if action == "view_reservations":
+        start_date_str = request.args.get("start_date")
+        end_date_str = request.args.get("end_date")
+
+        if start_date_str and end_date_str:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+            reservations = Reservation.query.filter(Reservation.date.between(start_date, end_date)).all()
+        else:
+            reservations = Reservation.query.all()
+
+    elif action == "manage_devices":
+        device_statuses = DeviceStatus.query.all()
+
     return render_template(
         "admin.html",
         reservations=reservations,
-        device_statuses=device_statuses
+        device_statuses=device_statuses,
+        action=action,
     )
-
-
-@app.route("/admin/reservations/delete/<int:id>", methods=["POST"])
-@login_required
-def delete_reservation(id):
-    reservation = db.session.get(Reservation, id)
-    if reservation:
-        db.session.delete(reservation)
-        db.session.commit()
-    return redirect(url_for("admin"))
-
-
-@app.route("/admin/devices/update/<int:id>", methods=["POST"])
-@login_required
-def update_device(id):
-    device_status = db.session.get(DeviceStatus, id)
-    if device_status:
-        device_status.status = request.form["status"]
-        db.session.commit()
-    return redirect(url_for("admin"))
 
 
 @app.route("/login", methods=["GET", "POST"])
