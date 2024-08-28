@@ -21,11 +21,12 @@
                         <select id="action" name="action" required>
                             <option value="view_reservations">View Reservations</option>
                             <option value="manage_devices">Manage Devices</option>
-                            <option value="add_user">Add User</option>
+                            <option value="add_user">Add Admin</option>
                         </select>
                         <button type="submit">Submit</button>
                     </form>
 
+                    <!-- View Reservations Section -->
                     {% if action == 'view_reservations' %}
                     <h3>Filter Reservations</h3>
                     <form action="{{ url_for('admin') }}" method="get">
@@ -68,6 +69,33 @@
                     {% else %}
                     <p>No reservations found for the selected period.</p>
                     {% endif %}
+                    {% endif %}
+
+                    <!-- Manage Devices Section -->
+                    {% if action == "manage_devices" %}
+                    <h2>Manage Devices</h2>
+                    <form method="post">
+                        <select name="device_name">
+                            {% for device in device_statuses %}
+                            <option value="{{ device.device }}">{{ device.device }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" name="command" value="shutdown">Shutdown</button>
+                    </form>
+                    <p>{{ message }}</p>
+                    {% endif %}
+
+                    <!-- Add Admin Section -->
+                    {% if action == 'add_user' %}
+                    <h2>Add New Admin</h2>
+                    <form action="{{ url_for('admin') }}" method="post">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                        <button type="submit" name="command" value="add_user">Add Admin</button>
+                    </form>
+                    <p>{{ message }}</p>
                     {% endif %}
                 </section>
             </div>

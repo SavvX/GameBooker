@@ -11,6 +11,7 @@ from flask_login import (
 import random
 import string
 from datetime import datetime
+import requests
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///reservations.db"
@@ -133,6 +134,27 @@ def update_status():
     return jsonify({"message": f"Status for {device} updated to {status}"})
 
 
+@app.route("/shutdown", methods=["POST"])
+@login_required
+def shutdown():
+    data = request.json
+    device = data["device"]
+
+    # Send the shutdown signal to the specific device (you can use an internal API or other mechanism)
+    # For now, let's assume a successful shutdown command is sent
+    shutdown_success = True  # Replace this with actual shutdown logic
+
+    if shutdown_success:
+        # Update device status to 'Shut Down'
+        device_status = DeviceStatus.query.filter_by(device=device).first()
+        if device_status:
+            device_status.status = "Shut Down"
+            db.session.commit()
+        return jsonify({"message": f"Shutdown command sent to {device}"}), 200
+    else:
+        return jsonify({"message": f"Failed to send shutdown command to {device}"}), 500
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -178,6 +200,27 @@ def admin():
     action = request.args.get("action", "view_reservations")
     reservations = []
     device_statuses = []
+    message = ""
+
+    if request.method == "POST":
+        if request.form.get("command") == "add_user":
+            # Adding a new admin
+            username = request.form.get("username")
+            password = request.form.get("password")
+            
+            # Check if the user already exists
+            if User.query.filter_by(username=username).first():
+                message = "User already exists."
+            else:
+                new_user = User(username=username, password=password)
+                db.session.add(new_user)
+                db.session.commit()
+                message = "New admin added successfully!"
+        elif request.form.get("command") == "shutdown":
+            # Shutdown device logic (not implemented in this example)
+            device_name = request.form.get("device_name")
+            message = f"Shutdown command sent to {device_name}."
+            # Here you should implement the code to send a shutdown command to the device.
 
     if action == "view_reservations":
         start_date_str = request.args.get("start_date")
@@ -198,7 +241,9 @@ def admin():
         reservations=reservations,
         device_statuses=device_statuses,
         action=action,
+        message=message
     )
+
 
 
 @app.route("/login", methods=["GET", "POST"])
