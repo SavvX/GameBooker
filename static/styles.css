@@ -209,3 +209,55 @@ td {
 tbody tr:hover {
     background-color: rgba(247, 218, 8, 0.1); /* Light Yellow on hover */
 }
+
+/* Styles for Login Page */
+.login-container {
+    max-width: 400px; /* Container width for login form */
+    margin: 0 auto; /* Center the login form */
+    padding: 20px; /* Add padding around form */
+    background-color: rgba(255, 255, 255, 1); /* White */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-top: 50px; /* Add space at the top */
+}
+
+.login-container h1 {
+    text-align: center; /* Center the title */
+    color: rgba(247, 218, 8, 1); /* Yellow */
+    margin-bottom: 20px; /* Space below the title */
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column; /* Arrange form items in a column */
+}
+
+.login-container label {
+    font-weight: bold; /* Bold text for labels */
+    margin-bottom: 5px; /* Space below labels */
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%; /* Full width for input fields */
+    padding: 10px; /* Padding inside input fields */
+    margin-bottom: 10px; /* Space below input fields */
+    border: 1px solid rgba(116, 114, 114, 1); /* Gray border */
+    border-radius: 4px; /* Rounded corners for input fields */
+    font-size: 14px; /* Standard font size */
+}
+
+.login-container button {
+    padding: 10px; /* Padding inside button */
+    background-color: rgba(247, 218, 8, 1); /* Yellow */
+    color: rgba(0, 0, 0, 1); /* Black */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners for button */
+    font-size: 16px; /* Font size for button text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.login-container button:hover {
+    background-color: rgba(255, 211, 0, 1); /* Slightly darker Yellow */
+}

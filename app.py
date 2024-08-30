@@ -10,8 +10,7 @@ from flask_login import (
 )
 import random
 import string
-from datetime import datetime
-import requests
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///reservations.db"
@@ -22,7 +21,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-
 class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -32,23 +30,19 @@ class Reservation(db.Model):
     password = db.Column(db.String(50), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-
 class DeviceStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     device = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
-
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
-
 
 @app.route("/reserve", methods=["POST"])
 def reserve():
@@ -85,7 +79,6 @@ def reserve():
         {"message": f"Reservation successful! Password for {device}: {password}"}
     )
 
-
 @app.route("/status", methods=["GET"])
 def status():
     devices = [
@@ -115,7 +108,6 @@ def status():
         status[device] = reservation.password if reservation else "Available"
 
     return jsonify(status)
-
 
 @app.route("/update_status", methods=["POST"])
 def update_status():
@@ -153,7 +145,6 @@ def shutdown():
         return jsonify({"message": f"Shutdown command sent to {device}"}), 200
     else:
         return jsonify({"message": f"Failed to send shutdown command to {device}"}), 500
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -193,58 +184,109 @@ def index():
 
     return render_template("index.html")
 
-
-@app.route("/admin", methods=["GET", "POST"])
-@login_required
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    action = request.args.get("action", "view_reservations")
-    reservations = []
-    device_statuses = []
-    message = ""
+    action = request.args.get('action')
+    frequency = request.args.get('frequency', 'daily')
+    time_range = request.args.get('time_range', 'all_time')
 
-    if request.method == "POST":
-        if request.form.get("command") == "add_user":
-            # Adding a new admin
-            username = request.form.get("username")
-            password = request.form.get("password")
-            
-            # Check if the user already exists
-            if User.query.filter_by(username=username).first():
-                message = "User already exists."
-            else:
-                new_user = User(username=username, password=password)
-                db.session.add(new_user)
-                db.session.commit()
-                message = "New admin added successfully!"
-        elif request.form.get("command") == "shutdown":
-            # Shutdown device logic (not implemented in this example)
-            device_name = request.form.get("device_name")
-            message = f"Shutdown command sent to {device_name}."
-            # Here you should implement the code to send a shutdown command to the device.
+    # Calculate start_date and end_date based on time_range
+    end_date = datetime.now()
+    if time_range == 'last_24_hours':
+        start_date = end_date - timedelta(days=1)
+    elif time_range == 'last_7_days':
+        start_date = end_date - timedelta(days=7)
+    elif time_range == 'last_month':
+        start_date = end_date - timedelta(days=30)
+    elif time_range == 'last_6_months':
+        start_date = end_date - timedelta(days=180)
+    elif time_range == 'last_year':
+        start_date = end_date - timedelta(days=365)
+    else:  # 'all_time'
+        start_date = datetime(2000, 1, 1)  # Or some reasonable historical start date
 
-    if action == "view_reservations":
-        start_date_str = request.args.get("start_date")
-        end_date_str = request.args.get("end_date")
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
 
-        if start_date_str and end_date_str:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-            reservations = Reservation.query.filter(Reservation.date.between(start_date, end_date)).all()
-        else:
-            reservations = Reservation.query.all()
+    statistics_data = {
+        'labels': [],
+        'values': []
+    }
 
-    elif action == "manage_devices":
-        device_statuses = DeviceStatus.query.all()
+    if action == 'statistics':
+        if frequency == 'hourly':
+            statistics_data = get_hourly_data(start_date, end_date)
+        elif frequency == 'daily':
+            statistics_data = get_daily_data(start_date, end_date)
+        elif frequency == 'weekly':
+            statistics_data = get_weekly_data(start_date, end_date)
+        elif frequency == 'monthly':
+            statistics_data = get_monthly_data(start_date, end_date)
+        elif frequency == 'yearly':
+            statistics_data = get_yearly_data(start_date, end_date)
 
-    return render_template(
-        "admin.html",
-        reservations=reservations,
-        device_statuses=device_statuses,
-        action=action,
-        message=message
-    )
+    return render_template('admin.html', action=action, statistics_data=statistics_data)
+
+def get_hourly_data(start_date, end_date):
+    data = db.session.query(
+        db.func.strftime('%Y-%m-%d %H:00:00', Reservation.date).label('hour'),
+        db.func.count().label('count')
+    ).filter(
+        Reservation.date.between(start_date, end_date)
+    ).group_by('hour').all()
+
+    labels = [row.hour for row in data]
+    values = [row.count for row in data]
+    return {'labels': labels, 'values': values}
 
 
+def get_daily_data(start_date, end_date):
+    data = db.session.query(
+        db.func.strftime('%Y-%m-%d', Reservation.date).label('day'),
+        db.func.count().label('count')
+    ).filter(
+        Reservation.date.between(start_date, end_date)
+    ).group_by('day').all()
+
+    labels = [row.day for row in data]
+    values = [row.count for row in data]
+    return {'labels': labels, 'values': values}
+
+def get_weekly_data(start_date, end_date):
+    data = db.session.query(
+        db.func.strftime('%Y-%W', Reservation.date).label('week'),
+        db.func.count().label('count')
+    ).filter(
+        Reservation.date.between(start_date, end_date)
+    ).group_by('week').all()
+
+    labels = [row.week for row in data]
+    values = [row.count for row in data]
+    return {'labels': labels, 'values': values}
+
+def get_monthly_data(start_date, end_date):
+    data = db.session.query(
+        db.func.strftime('%Y-%m', Reservation.date).label('month'),
+        db.func.count().label('count')
+    ).filter(
+        Reservation.date.between(start_date, end_date)
+    ).group_by('month').all()
+
+    labels = [row.month for row in data]
+    values = [row.count for row in data]
+    return {'labels': labels, 'values': values}
+
+def get_yearly_data(start_date, end_date):
+    data = db.session.query(
+        db.func.strftime('%Y', Reservation.date).label('year'),
+        db.func.count().label('count')
+    ).filter(
+        Reservation.date.between(start_date, end_date)
+    ).group_by('year').all()
+
+    labels = [row.year for row in data]
+    values = [row.count for row in data]
+    return {'labels': labels, 'values': values}
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -259,13 +301,11 @@ def login():
             flash("Invalid username or password")
     return render_template("login.html")
 
-
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
-
 
 if __name__ == "__main__":
     with app.app_context():
