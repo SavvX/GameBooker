@@ -30,19 +30,33 @@ class Reservation(db.Model):
     password = db.Column(db.String(50), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    def __repr__(self):
+        return (f"<Reservation {self.id} | Name: {self.name} | School: {self.school} | "
+                f"Email: {self.email} | Device: {self.device} | Date: {self.date}>")
+
 class DeviceStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     device = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return f"<DeviceStatus {self.id} | Device: {self.device} | Status: {self.status}>"
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
 
+    def __repr__(self):
+        return f"<User {self.id} | Username: {self.username}>"
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 @app.route("/reserve", methods=["POST"])
 def reserve():
@@ -52,9 +66,7 @@ def reserve():
     email = data["email"]
     device = data["device"]
 
-    # Check if the device is available
     device_status = DeviceStatus.query.filter_by(device=device).first()
-
     if device_status and device_status.status != "Available":
         return jsonify({"message": f"Device {device} is not available."}), 400
 
@@ -66,7 +78,6 @@ def reserve():
     db.session.add(reservation)
     db.session.commit()
 
-    # Update device status to 'Reserved'
     if device_status:
         device_status.status = "Reserved"
     else:
@@ -82,21 +93,8 @@ def reserve():
 @app.route("/status", methods=["GET"])
 def status():
     devices = [
-        "PC1",
-        "PC2",
-        "PC3",
-        "PC4",
-        "PC5",
-        "PC6",
-        "PC7",
-        "PC8",
-        "PC9",
-        "PC10",
-        "PS5",
-        "Switch1",
-        "Switch2",
-        "RacingSim1",
-        "RacingSim2",
+        "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10",
+        "PS5", "Switch1", "Switch2", "RacingSim1", "RacingSim2",
     ]
     status = {}
     for device in devices:
@@ -132,12 +130,9 @@ def shutdown():
     data = request.json
     device = data["device"]
 
-    # Send the shutdown signal to the specific device (you can use an internal API or other mechanism)
-    # For now, let's assume a successful shutdown command is sent
     shutdown_success = True  # Replace this with actual shutdown logic
 
     if shutdown_success:
-        # Update device status to 'Shut Down'
         device_status = DeviceStatus.query.filter_by(device=device).first()
         if device_status:
             device_status.status = "Shut Down"
@@ -155,7 +150,6 @@ def index():
         email = data["email"]
         device = data["device"]
 
-        # Check if the device is available
         device_status = DeviceStatus.query.filter_by(device=device).first()
 
         if device_status and device_status.status != "Available":
@@ -170,7 +164,6 @@ def index():
         db.session.add(reservation)
         db.session.commit()
 
-        # Update device status to 'Reserved'
         if device_status:
             device_status.status = "Reserved"
         else:
@@ -185,12 +178,12 @@ def index():
     return render_template("index.html")
 
 @app.route('/admin', methods=['GET', 'POST'])
+@login_required
 def admin():
     action = request.args.get('action')
     frequency = request.args.get('frequency', 'daily')
     time_range = request.args.get('time_range', 'all_time')
 
-    # Calculate start_date and end_date based on time_range
     end_date = datetime.now()
     if time_range == 'last_24_hours':
         start_date = end_date - timedelta(days=1)
@@ -203,10 +196,7 @@ def admin():
     elif time_range == 'last_year':
         start_date = end_date - timedelta(days=365)
     else:  # 'all_time'
-        start_date = datetime(2000, 1, 1)  # Or some reasonable historical start date
-
-    start_date_str = start_date.strftime('%Y-%m-%d')
-    end_date_str = end_date.strftime('%Y-%m-%d')
+        start_date = datetime(2020, 1, 1) 
 
     statistics_data = {
         'labels': [],
@@ -232,20 +222,21 @@ def get_hourly_data(start_date, end_date):
         db.func.strftime('%Y-%m-%d %H:00:00', Reservation.date).label('hour'),
         db.func.count().label('count')
     ).filter(
-        Reservation.date.between(start_date, end_date)
+        Reservation.date >= start_date,
+        Reservation.date <= end_date
     ).group_by('hour').all()
 
     labels = [row.hour for row in data]
     values = [row.count for row in data]
     return {'labels': labels, 'values': values}
 
-
 def get_daily_data(start_date, end_date):
     data = db.session.query(
         db.func.strftime('%Y-%m-%d', Reservation.date).label('day'),
         db.func.count().label('count')
     ).filter(
-        Reservation.date.between(start_date, end_date)
+        Reservation.date >= start_date,
+        Reservation.date <= end_date
     ).group_by('day').all()
 
     labels = [row.day for row in data]
@@ -257,7 +248,8 @@ def get_weekly_data(start_date, end_date):
         db.func.strftime('%Y-%W', Reservation.date).label('week'),
         db.func.count().label('count')
     ).filter(
-        Reservation.date.between(start_date, end_date)
+        Reservation.date >= start_date,
+        Reservation.date <= end_date
     ).group_by('week').all()
 
     labels = [row.week for row in data]
@@ -269,7 +261,8 @@ def get_monthly_data(start_date, end_date):
         db.func.strftime('%Y-%m', Reservation.date).label('month'),
         db.func.count().label('count')
     ).filter(
-        Reservation.date.between(start_date, end_date)
+        Reservation.date >= start_date,
+        Reservation.date <= end_date
     ).group_by('month').all()
 
     labels = [row.month for row in data]
@@ -281,31 +274,13 @@ def get_yearly_data(start_date, end_date):
         db.func.strftime('%Y', Reservation.date).label('year'),
         db.func.count().label('count')
     ).filter(
-        Reservation.date.between(start_date, end_date)
+        Reservation.date >= start_date,
+        Reservation.date <= end_date
     ).group_by('year').all()
 
     labels = [row.year for row in data]
     values = [row.count for row in data]
     return {'labels': labels, 'values': values}
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
-            login_user(user)
-            return redirect(url_for("admin"))
-        else:
-            flash("Invalid username or password")
-    return render_template("login.html")
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     with app.app_context():

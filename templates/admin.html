@@ -28,237 +28,26 @@
                         <button type="submit">Submit</button>
                     </form>
 
-                    <!-- Statistics Section -->
+                    <!-- Include Statistics Section -->
                     {% if action == 'statistics' %}
-                    <h3>Filter Statistics</h3>
-                    <form action="{{ url_for('admin') }}" method="get">
-                        <label for="frequency">Frequency:</label>
-                        <select id="frequency" name="frequency" required>
-                            <option value="hourly" {% if request.args.get('frequency') == 'hourly' %}selected{% endif %}>Hourly</option>
-                            <option value="daily" {% if request.args.get('frequency') == 'daily' %}selected{% endif %}>Daily</option>
-                            <option value="weekly" {% if request.args.get('frequency') == 'weekly' %}selected{% endif %}>Weekly</option>
-                            <option value="monthly" {% if request.args.get('frequency') == 'monthly' %}selected{% endif %}>Monthly</option>
-                            <option value="yearly" {% if request.args.get('frequency') == 'yearly' %}selected{% endif %}>Yearly</option>
-                        </select>
-
-                        <label for="time_range">Time Range:</label>
-                        <select id="time_range" name="time_range" required>
-                            <option value="last_24_hours" {% if request.args.get('time_range') == 'last_24_hours' %}selected{% endif %}>Last 24 hours</option>
-                            <option value="last_7_days" {% if request.args.get('time_range') == 'last_7_days' %}selected{% endif %}>Last 7 days</option>
-                            <option value="last_month" {% if request.args.get('time_range') == 'last_month' %}selected{% endif %}>Last month</option>
-                            <option value="last_6_months" {% if request.args.get('time_range') == 'last_6_months' %}selected{% endif %}>Last 6 months</option>
-                            <option value="last_year" {% if request.args.get('time_range') == 'last_year' %}selected{% endif %}>Last year</option>
-                            <option value="all_time" {% if request.args.get('time_range') == 'all_time' %}selected{% endif %}>All time</option>
-                        </select>
-
-                        <input type="hidden" name="action" value="statistics">
-                        <button type="submit">Filter</button>
-                    </form>
-
-                    <h3>Statistics</h3>
-
-                    <!-- Chart Container -->
-                    <div id="chartContainer">
-                        {% if request.args.get('frequency') == 'hourly' %}
-                        <canvas id="hourlyChart"></canvas>
-                        <script>
-                            const ctxHourly = document.getElementById('hourlyChart').getContext('2d');
-                            new Chart(ctxHourly, {
-                                type: 'bar',
-                                data: {
-                                    labels: {{ statistics_data.labels|tojson }},
-                                    datasets: [{
-                                        label: 'Number of Visitors',
-                                        data: {{ statistics_data.values|tojson }},
-                                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                        borderColor: 'rgba(255, 159, 64, 1)',
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                        {% elif request.args.get('frequency') == 'daily' %}
-                        <canvas id="dailyChart"></canvas>
-                        <script>
-                            const ctxDaily = document.getElementById('dailyChart').getContext('2d');
-                            new Chart(ctxDaily, {
-                                type: 'bar',
-                                data: {
-                                    labels: {{ statistics_data.labels|tojson }},
-                                    datasets: [{
-                                        label: 'Number of Visitors',
-                                        data: {{ statistics_data.values|tojson }},
-                                        backgroundColor: 'rgba(255, 205, 86, 0.2)',
-                                        borderColor: 'rgba(255, 205, 86, 1)',
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                        {% elif request.args.get('frequency') == 'weekly' %}
-                        <canvas id="weeklyChart"></canvas>
-                        <script>
-                            const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
-                            new Chart(ctxWeekly, {
-                                type: 'bar',
-                                data: {
-                                    labels: {{ statistics_data.labels|tojson }},
-                                    datasets: [{
-                                        label: 'Number of Visitors',
-                                        data: {{ statistics_data.values|tojson }},
-                                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                        borderColor: 'rgba(54, 162, 235, 1)',
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                        {% elif request.args.get('frequency') == 'monthly' %}
-                        <canvas id="monthlyChart"></canvas>
-                        <script>
-                            const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-                            new Chart(ctxMonthly, {
-                                type: 'bar',
-                                data: {
-                                    labels: {{ statistics_data.labels|tojson }},
-                                    datasets: [{
-                                        label: 'Number of Visitors',
-                                        data: {{ statistics_data.values|tojson }},
-                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                        borderColor: 'rgba(75, 192, 192, 1)',
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                        {% elif request.args.get('frequency') == 'yearly' %}
-                        <canvas id="yearlyChart"></canvas>
-                        <script>
-                            const ctxYearly = document.getElementById('yearlyChart').getContext('2d');
-                            new Chart(ctxYearly, {
-                                type: 'bar',
-                                data: {
-                                    labels: {{ statistics_data.labels|tojson }},
-                                    datasets: [{
-                                        label: 'Number of Visitors',
-                                        data: {{ statistics_data.values|tojson }},
-                                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                                        borderColor: 'rgba(153, 102, 255, 1)',
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        </script>
-                        {% endif %}
-                    </div>
+                    {% include 'statistics_section.html' %}
                     {% endif %}
 
-                    <!-- View Reservations Section -->
+                    <!-- Include View Reservations Section -->
                     {% if action == 'view_reservations' %}
-                    <h3>Filter Reservations</h3>
-                    <form action="{{ url_for('admin') }}" method="get">
-                        <label for="start_date">Start Date:</label>
-                        <input type="date" id="start_date" name="start_date" required>
-                        <label for="end_date">End Date:</label>
-                        <input type="date" id="end_date" name="end_date" required>
-                        <input type="hidden" name="action" value="view_reservations">
-                        <button type="submit">Filter</button>
-                    </form>
-
-                    {% if reservations %}
-                    <h3>Reservations</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>School</th>
-                                <th>Email</th>
-                                <th>Device</th>
-                                <th>Password</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for reservation in reservations %}
-                            <tr>
-                                <td>{{ reservation.id }}</td>
-                                <td>{{ reservation.name }}</td>
-                                <td>{{ reservation.school }}</td>
-                                <td>{{ reservation.email }}</td>
-                                <td>{{ reservation.device }}</td>
-                                <td>{{ reservation.password }}</td>
-                                <td>{{ reservation.date.strftime('%Y-%m-%d') }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p>No reservations found for the selected period.</p>
-                    {% endif %}
+                    {% include 'view_reservations_section.html' %}
                     {% endif %}
 
-                    <!-- Manage Devices Section -->
-                    {% if action == "manage_devices" %}
-                    <h2>Manage Devices</h2>
-                    <form method="post">
-                        <select name="device_name">
-                            {% for device in device_statuses %}
-                            <option value="{{ device.device }}">{{ device.device }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" name="command" value="shutdown">Shutdown</button>
-                    </form>
-                    <p>{{ message }}</p>
+                    <!-- Include Manage Devices Section -->
+                    {% if action == 'manage_devices' %}
+                    {% include 'manage_devices_section.html' %}
                     {% endif %}
 
-                    <!-- Add Admin Section -->
+                    <!-- Include Add Admin Section -->
                     {% if action == 'add_user' %}
-                    <h2>Add New Admin</h2>
-                    <form action="{{ url_for('admin') }}" method="post">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" name="username" required>
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" required>
-                        <button type="submit" name="command" value="add_user">Add Admin</button>
-                    </form>
-                    <p>{{ message }}</p>
+                    {% include 'add_admin_section.html' %}
                     {% endif %}
+
                 </section>
             </div>
         </main>
