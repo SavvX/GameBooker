@@ -29,6 +29,7 @@ STATUS_SHUT_DOWN = "Shut Down"
 
 # Models
 class Reservation(db.Model):
+    __tablename__ = 'reservation'  # Ensure this matches the actual table name in the DB
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     school = db.Column(db.String(50), nullable=False)
