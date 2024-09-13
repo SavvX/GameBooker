@@ -17,7 +17,7 @@
             <div class="left-panel">
                 <section class="admin-panel">
                     <h2>Admin Panel</h2>
-                    <form id="adminForm" action="{{ url_for('admin') }}" method="get">
+                    <form id="adminForm" action="#" method="get">
                         <label for="action">Action:</label>
                         <select id="action" name="action" required>
                             <option value="view_reservations" {% if action == 'view_reservations' %}selected{% endif %}>View Reservations</option>
@@ -25,32 +25,128 @@
                             <option value="add_user" {% if action == 'add_user' %}selected{% endif %}>Add Admin</option>
                             <option value="statistics" {% if action == 'statistics' %}selected{% endif %}>Check Statistics</option>
                         </select>
+                        
+                        <label for="frequency">Frequency:</label>
+                        <select id="frequency" name="frequency" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        
+                        <label for="time_range">Time Range:</label>
+                        <select id="time_range" name="time_range" required>
+                            <option value="7_days">Last 7 Days</option>
+                            <option value="30_days">Last 30 Days</option>
+                            <option value="all_time">All Time</option>
+                        </select>
+
                         <button type="submit">Submit</button>
                     </form>
 
-                    <!-- Include Statistics Section -->
-                    {% if action == 'statistics' %}
-                    {% include 'statistics_section.html' %}
-                    {% endif %}
-
-                    <!-- Include View Reservations Section -->
-                    {% if action == 'view_reservations' %}
-                    {% include 'view_reservations_section.html' %}
-                    {% endif %}
-
-                    <!-- Include Manage Devices Section -->
-                    {% if action == 'manage_devices' %}
-                    {% include 'manage_devices_section.html' %}
-                    {% endif %}
-
-                    <!-- Include Add Admin Section -->
-                    {% if action == 'add_user' %}
-                    {% include 'add_admin_section.html' %}
-                    {% endif %}
-
+                    <!-- Chart Containers -->
+                    <div class="charts-container">
+                        <canvas id="reservationChart"></canvas>
+                        <canvas id="deviceChart"></canvas>
+                    </div>
                 </section>
             </div>
         </main>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const frequencySelect = document.getElementById('frequency');
+        const timeRangeSelect = document.getElementById('time_range');
+        const actionSelect = document.getElementById('action');
+        const reservationChartCtx = document.getElementById('reservationChart').getContext('2d');
+        const deviceChartCtx = document.getElementById('deviceChart').getContext('2d');
+
+        // Initialize charts
+        const reservationChart = new Chart(reservationChartCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Will be filled dynamically
+                datasets: [{
+                    label: 'Reservations',
+                    data: [], // Will be filled dynamically
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const deviceChart = new Chart(deviceChartCtx, {
+            type: 'bar',
+            data: {
+                labels: [], // Will be filled dynamically
+                datasets: [{
+                    label: 'Devices',
+                    data: [], // Will be filled dynamically
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Function to fetch data and update charts
+        async function fetchDataAndUpdateCharts() {
+            const frequency = frequencySelect.value;
+            const timeRange = timeRangeSelect.value;
+            const action = actionSelect.value;
+
+            if (action === 'statistics') {
+                try {
+                    const response = await fetch(`/api/data?frequency=${frequency}&time_range=${timeRange}`);
+                    const data = await response.json();
+
+                    // Update Reservation Chart
+                    reservationChart.data.labels = data.reservationLabels;
+                    reservationChart.data.datasets[0].data = data.reservationData;
+                    reservationChart.update();
+
+                    // Update Device Chart
+                    deviceChart.data.labels = data.deviceLabels;
+                    deviceChart.data.datasets[0].data = data.deviceData;
+                    deviceChart.update();
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            }
+        }
+
+        // Initial fetch
+        fetchDataAndUpdateCharts();
+
+        // Attach event listener for form submit
+        document.getElementById('adminForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            fetchDataAndUpdateCharts();
+        });
+    });
+    </script>
 </body>
 </html>
