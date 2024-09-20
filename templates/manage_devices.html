@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Management</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Device Management</h1>
+            <p class="subtitle">Manage and Reserve Devices</p>
+        </header>
+        <main>
+            <div class="left-panel">
+                <section class="device-management">
+                    <h2>Manage a Device</h2>
+                    <form id="deviceForm">
+                        <label for="device">Device:</label>
+                        <select id="device" name="device" required>
+                            <optgroup label="Computers">
+                                <option value="PC1">PC1</option>
+                                <option value="PC2">PC2</option>
+                                <option value="PC3">PC3</option>
+                                <option value="PC4">PC4</option>
+                                <option value="PC5">PC5</option>
+                                <option value="PC6">PC6</option>
+                                <option value="PC7">PC7</option>
+                                <option value="PC8">PC8</option>
+                                <option value="PC9">PC9</option>
+                                <option value="PC10">PC10</option>
+                            </optgroup>
+                            <optgroup label="Consoles">
+                                <option value="PS5">PS5</option>
+                                <option value="Switch1">Nintendo Switch 1</option>
+                                <option value="Switch2">Nintendo Switch 2</option>
+                            </optgroup>
+                            <optgroup label="Simulators">
+                                <option value="RacingSim1">Racing Sim 1</option>
+                                <option value="RacingSim2">Racing Sim 2</option>
+                            </optgroup>
+                        </select>
+
+                        <label for="action">Action:</label>
+                        <select id="action" name="action" required>
+                            <option value="update_status">Update Status</option>
+                            <option value="shutdown_device">Shutdown Device</option>
+                        </select>
+
+                        <button type="submit">Submit</button>
+                    </form>
+                </section>
+            </div>
+            <div class="right-panel">
+                <section class="last-reservation-info">
+                    <h2>Last Reservation Information</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>School</th>
+                                <th>Reservation Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through the device information passed from the route -->
+                            {% for device in devices %}
+                            <tr>
+                                <td>{{ reservation.device }}</td>
+                                <td>{{ reservation.name }}</td>
+                                <td>{{ reservation.name.email }}</td>
+                                <td>{{ reservation.name.school }}</td>
+                                <td>{{ reservation.name.date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('deviceForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const device = document.getElementById('device').value;
+            const action = document.getElementById('action').value;
+
+            fetch('/manage_devices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ device, action })
+            })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+        });
+
+        function fetchDeviceStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const devices = document.querySelectorAll('.device');
+                    devices.forEach(device => {
+                        const deviceId = device.id;
+                        const status = data[deviceId];
+                        device.style.border = status === 'Available' ? '5px solid green' : '5px solid red';
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        fetchDeviceStatus(); // Initial fetch
+        setInterval(fetchDeviceStatus, 5000);  // Refresh status every 5 seconds
+    </script>
+</body>
+
+</html>

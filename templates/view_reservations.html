@@ -1,0 +1,80 @@
+<!-- Inside view_reservations.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hive - View Reservations</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>The Hive</h1>
+            <h2>Powered by GameBooker</h2>
+        </header>
+        <main>
+            <div class="left-panel">
+                <section class="admin-panel">
+                    <h2>Admin Panel</h2>
+                    <!-- Filter Form -->
+                    <form id="filterForm" action="{{ url_for('view_reservations') }}" method="get">
+                        <label for="rows">Rows per page:</label>
+                        <select id="rows" name="rows">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+
+                        <label for="order">Order by:</label>
+                        <select id="order" name="order">
+                            <option value="student_number">Student Number</option>
+                            <option value="name">Name</option>
+                            <option value="device">Device</option>
+                            <option value="date">Date</option>
+                            <option value="email">Email</option>
+                        </select>
+
+                        <label for="direction">Order direction:</label>
+                        <select id="direction" name="direction">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+
+                        <button type="submit">Apply Filters</button>
+                    </form>
+                </section>
+            </div>
+            
+            <div class="right-panel">
+                <!-- Table to view reservations -->
+                <section class="reservation-form">
+                    <h2>View Reservations</h2>
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Student Number</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Device</th>
+                                <th>Date</th>
+                            </tr>
+                            <!-- Dynamically populate from Flask -->
+                            {% for reservation in reservations %}
+                            <tr>
+                                <td>{{ reservation.student_number }}</td>
+                                <td>{{ reservation.name }}</td>
+                                <td>{{ reservation.email }}</td>
+                                <td>{{ reservation.device }}</td>
+                                <td>{{ reservation.date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!-- check_statistics.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hive - Check Statistics</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Check Statistics</h1>
+        </header>
+        <main>
+            <!-- Display charts for statistics -->
+            <canvas id="reservationChart"></canvas>
+            <canvas id="deviceChart"></canvas>
+
+            <!-- Fetch and display data from Flask -->
+            <script>
+                const reservationChartCtx = document.getElementById('reservationChart').getContext('2d');
+                const deviceChartCtx = document.getElementById('deviceChart').getContext('2d');
+
+                // Initialize the charts
+                const reservationChart = new Chart(reservationChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ statistics_data.labels }},
+                        datasets: [{
+                            label: 'Reservations',
+                            data: {{ statistics_data.values }},
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    }
+                });
+
+                const deviceChart = new Chart(deviceChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ statistics_data.device_labels }},
+                        datasets: [{
+                            label: 'Devices',
+                            data: {{ statistics_data.device_values }},
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    }
+                });
+            </script>
+        </main>
+    </div>
+</body>
+</html>

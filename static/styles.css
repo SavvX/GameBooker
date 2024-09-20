@@ -17,6 +17,7 @@ body {
     padding: 20px;
 }
 
+/* Header styles */
 header {
     width: 100%;
     text-align: center;
@@ -29,14 +30,17 @@ header h1 {
     margin-bottom: 5px;
 }
 
-.subtitle {
-    font-size: 1em; /* Smaller subtitle size */
+header h2 {
+    font-size: 1.5em; /* Slightly smaller than h1 but larger than normal text */
     color: rgba(116, 114, 114, 1); /* Gray */
+    margin-bottom: 20px;
 }
 
+/* Main content styles */
 main {
     display: flex;
     width: 100%;
+    justify-content: center; /* Center the content */
 }
 
 .left-panel {
@@ -260,4 +264,46 @@ tbody tr:hover {
 
 .login-container button:hover {
     background-color: rgba(255, 211, 0, 1); /* Slightly darker Yellow */
+}
+
+/* Container for the table to handle scrolling */
+.table-container {
+    max-height: 1200px; /* Set a fixed height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid rgba(116, 114, 114, 1); /* Optional: Add a border for better visibility */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    margin-top: 20px; /* Space above the table */
+    width: 100%; /* Adjust width as needed */
+    position: relative; /* Ensure relative positioning for sticky headers */
+}
+
+/* Table inside the container */
+.table-container table {
+    width: 100%; /* Adjust width as needed */
+    border-collapse: collapse; /* Collapse table borders */
+    background-color: rgba(255, 255, 255, 1); /* White background */
+}
+
+/* Table headers */
+.table-container th {
+    position: sticky;
+    top: 0;
+    background-color: rgba(247, 218, 8, 1); /* Same yellow as the apply filters button */
+    color: rgba(0, 0, 0, 1); /* Black text for better contrast */
+    z-index: 1; /* Ensure headers are above the content */
+    padding: 10px; /* Add padding for better readability */
+    border: 1px solid rgba(116, 114, 114, 1); /* Gray border for headers */
+}
+
+/* Table cells */
+.table-container td {
+    padding: 10px; /* Add padding for better readability */
+    border: 1px solid rgba(116, 114, 114, 1); /* Gray border for table cells */
+    text-align: left;
+}
+
+/* Optional: Set specific width for columns */
+.table-container th:nth-child(1),
+.table-container td:nth-child(1) {
+    width: 150px; /* Example width for the first column */
 }
