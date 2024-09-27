@@ -61,21 +61,18 @@
                         <thead>
                             <tr>
                                 <th>Device</th>
+                                <th>Last Reservation Date</th>
                                 <th>Name</th>
-                                <th>Email</th>
-                                <th>School</th>
-                                <th>Reservation Time</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Loop through the device information passed from the route -->
-                            {% for device in devices %}
+                            {% for reservation in last_reservations %}
                             <tr>
                                 <td>{{ reservation.device }}</td>
+                                <td>{{ reservation.date.strftime('%d/%m/%Y') }}</td>
                                 <td>{{ reservation.name }}</td>
-                                <td>{{ reservation.name.email }}</td>
-                                <td>{{ reservation.name.school }}</td>
-                                <td>{{ reservation.name.date }}</td>
+                                <td>{{ reservation.status }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
