@@ -9,6 +9,9 @@ import random
 import string
 from datetime import datetime, timedelta
 from sqlalchemy import asc, desc, func
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql import literal_column
+import logging
 
 # Initialize Flask app and configure database
 app = Flask(__name__)
@@ -265,14 +268,137 @@ def index():
 def admin():
     if request.method == 'POST':
         action = request.form['action']
-        device = request.form['device']
-
-        if action == 'Update Status':
-            return redirect(url_for('update_status', device=device))
-        elif action == 'Shutdown Device':
-            return redirect(url_for('shutdown', device=device))
+        
+        # Redirect based on the selected action
+        if action == 'view_reservations':
+            return redirect(url_for('view_reservations'))  # Example route for viewing reservations
+        elif action == 'manage_devices':
+            return redirect(url_for('manage_devices'))  # Route for managing devices
+        elif action == 'add_admin':
+            return redirect(url_for('add_admin'))  # Route for adding admin
+        elif action == 'check_statistics':
+            return redirect(url_for('check_statistics'))  # Route for checking statistics
 
     return render_template('admin.html')
+
+@app.route('/view_reservations', methods=['GET'])
+@login_required
+def view_reservations():
+    # Get filter values from the request
+    rows = request.args.get('rows', default='10')  # Treat 'rows' as a string to handle "all"
+    order_by = request.args.get('order', default='date', type=str)
+    direction = request.args.get('direction', default='desc', type=str)
+    
+    # Determine sort direction (ascending/descending)
+    if direction == 'desc':
+        order_clause = desc(order_by)
+    else:
+        order_clause = asc(order_by)
+        
+    # Fetch reservations based on rows value
+    if rows == 'all':
+        # Fetch all reservations without limit
+        reservations = Reservation.query.order_by(order_clause).all()
+    else:
+        # Convert rows to int and apply a limit
+        rows_per_page = int(rows)
+        reservations = Reservation.query.order_by(order_clause).limit(rows_per_page).all()
+
+
+    # Fetch device statuses
+    device_statuses = DeviceStatus.query.all()
+    statuses = {status.device: status.status for status in device_statuses}
+
+    # Pass reservations and statuses to the template
+    return render_template('view_reservations.html', reservations=reservations, statuses=statuses)
+
+@app.route('/manage_devices', methods=['GET'])
+@login_required
+def manage_devices():
+    # Alias for the Reservation table
+    ReservationAlias = aliased(Reservation)
+    
+    # Subquery for ranking reservations by device and date
+    ranked_reservations = db.session.query(
+        Reservation.device,
+        Reservation.date.label('last_date'),
+        Reservation.name,
+        Reservation.pin_hash,
+        func.row_number().over(
+            partition_by=Reservation.device,
+            order_by=Reservation.date.desc()
+        ).label('row_num')
+    ).subquery()
+
+    # Main query to get the most recent reservations per device
+    latest_reservations = db.session.query(
+        ranked_reservations.c.device,
+        ranked_reservations.c.last_date,
+        ranked_reservations.c.name,
+        ranked_reservations.c.pin_hash
+    ).filter(ranked_reservations.c.row_num == 1).all()
+
+    # Fetch device statuses
+    devices = DeviceStatus.query.all()
+
+    # Create a list to store device info with the latest reservation
+    device_info = []
+    
+    # Combine the devices and the latest reservations
+    for device in devices:
+        last_reservation = next(
+            (res for res in latest_reservations if res.device == device.device), None
+        )
+
+        device_info.append({
+            'device': device.device,
+            'status': device.status,
+            'last_reservation': {
+                'name': last_reservation.name if last_reservation else 'N/A',
+                'date': last_reservation.last_date.strftime('%Y-%m-%d %H:%M') if last_reservation else 'N/A',
+            }
+        })
+
+    # Pass the device info to the template
+    return render_template('manage_devices.html', devices=device_info)
+
+# Add user route
+@app.route('/add_admin', methods=['GET', 'POST'])
+@login_required
+def add_admin():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f"User {username} added successfully!")
+        return redirect(url_for('admin'))
+    return render_template('add_admin.html')
+
+
+# Route to check statistics
+@app.route('/check_statistics', methods=['GET'])
+@login_required
+def check_statistics():
+    # Get total number of reservations
+    total_reservations = Reservation.query.count()
+    
+    # Get device statuses
+    device_statuses = DeviceStatus.query.all()
+    
+    # Count reserved and available devices
+    reserved_count = sum(1 for status in device_statuses if status.status == STATUS_RESERVED)
+    available_count = sum(1 for status in device_statuses if status.status == STATUS_AVAILABLE)
+    shut_down_count = sum(1 for status in device_statuses if status.status == STATUS_SHUT_DOWN)
+    
+    # Pass statistics to the template
+    return render_template('check_statistics.html', 
+                           total_reservations=total_reservations,
+                           reserved_count=reserved_count,
+                           available_count=available_count,
+                           shut_down_count=shut_down_count)
 
 # Logout route
 @app.route('/logout')

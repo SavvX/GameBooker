@@ -1,12 +1,14 @@
 <!-- Inside view_reservations.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Hive - View Reservations</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -25,6 +27,7 @@
                             <option value="20">20</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
+                            <option value="all">All</option>
                         </select>
 
                         <label for="order">Order by:</label>
@@ -46,7 +49,7 @@
                     </form>
                 </section>
             </div>
-            
+
             <div class="right-panel">
                 <!-- Table to view reservations -->
                 <section class="reservation-form">
@@ -77,4 +80,5 @@
         </main>
     </div>
 </body>
+
 </html>
